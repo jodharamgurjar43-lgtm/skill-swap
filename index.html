@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillSwap - Learn by Teaching</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-3 pointer-events-none"></div>
+
+    <!-- Navigation Bar -->
+    <header class="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <!-- Logo -->
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('dashboard')">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white font-black text-xl shadow-md shadow-indigo-200">
+                        <i class="fa-solid fa-arrows-rotate"></i>
+                    </div>
+                    <div>
+                        <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-violet-600">SkillSwap</span>
+                        <span class="block text-[10px] font-semibold text-slate-400 tracking-wider uppercase">Learn By Teaching</span>
+                    </div>
+                </div>
+
+                <!-- Desktop Nav Tabs -->
+                <nav class="hidden md:flex space-x-1 lg:space-x-2">
+                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-chart-pie"></i> Dashboard
+                    </button>
+                    <button onclick="switchTab('matches')" id="nav-matches" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-people-arrows"></i> Find Matches
+                    </button>
+                    <button onclick="switchTab('sessions')" id="nav-sessions" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 relative">
+                        <i class="fa-solid fa-calendar-check"></i> Requests & Sessions
+                        <span id="pending-badge" class="hidden bg-rose-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">0</span>
+                    </button>
+                    <button onclick="switchTab('insights')" id="nav-insights" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-chart-line"></i> Demand Insights
+                    </button>
+                    <button onclick="switchTab('profile')" id="nav-profile" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-user"></i> My Profile
+                    </button>
+                </nav>
+
+                <!-- Current User Quick Info -->
+                <div class="flex items-center gap-3">
+                    <div class="text-right hidden sm:block">
+                        <div id="header-user-name" class="text-sm font-bold text-slate-800">Alex Johnson</div>
+                        <div id="header-user-role" class="text-xs text-indigo-600 font-medium">Student & Mentor</div>
+                    </div>
+                    <img id="header-user-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150" alt="Profile" class="w-10 h-10 rounded-full border-2 border-indigo-500 object-cover shadow-sm cursor-pointer" onclick="switchTab('profile')">
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Bottom Nav Bar -->
+        <div class="md:hidden flex justify-around bg-white border-t border-slate-200 py-2 fixed bottom-0 left-0 right-0 z-40">
+            <button onclick="switchTab('dashboard')" class="mobile-nav-btn text-xs font-medium flex flex-col items-center gap-1 text-slate-500" id="mob-dashboard">
+                <i class="fa-solid fa-chart-pie text-lg"></i> Home
+            </button>
+            <button onclick="switchTab('matches')" class="mobile-nav-btn text-xs font-medium flex flex-col items-center gap-1 text-slate-500" id="mob-matches">
+                <i class="fa-solid fa-people-arrows text-lg"></i> Matches
+            </button>
+            <button onclick="switchTab('sessions')" class="mobile-nav-btn text-xs font-medium flex flex-col items-center gap-1 text-slate-500" id="mob-sessions">
+                <i class="fa-solid fa-calendar-check text-lg"></i> Sessions
+            </button>
+            <button onclick="switchTab('insights')" class="mobile-nav-btn text-xs font-medium flex flex-col items-center gap-1 text-slate-500" id="mob-insights">
+                <i class="fa-solid fa-chart-line text-lg"></i> Insights
+            </button>
+            <button onclick="switchTab('profile')" class="mobile-nav-btn text-xs font-medium flex flex-col items-center gap-1 text-slate-500" id="mob-profile">
+                <i class="fa-solid fa-user text-lg"></i> Profile
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-20 md:pb-8">
+
+        <!-- ================= TAB 1: DASHBOARD ================= -->
+        <section id="tab-dashboard" class="tab-content space-y-6">
+            <!-- Welcome Banner -->
+            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-600 via-indigo-700 to-violet-800 text-white p-6 sm:p-8 shadow-xl shadow-indigo-100">
+                <div class="relative z-10 max-w-2xl">
+                    <span class="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-semibold uppercase tracking-wider text-indigo-100 mb-3 inline-block">Skill Sharing Network</span>
+                    <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight leading-tight mb-2">Welcome back, <span id="dash-greeting-name">Alex</span>! 👋</h1>
+                    <p class="text-indigo-100 text-sm sm:text-base mb-6">Trade your expertise for new skills. You teach what you know, and learn what you want without spending money.</p>
+                    <div class="flex flex-wrap gap-3">
+                        <button onclick="switchTab('matches')" class="px-5 py-2.5 bg-white text-indigo-700 rounded-xl font-bold text-sm hover:bg-slate-100 transition shadow-md flex items-center gap-2">
+                            <i class="fa-solid fa-magnifying-glass"></i> Explore Matches
+                        </button>
+                        <button onclick="switchTab('profile')" class="px-5 py-2.5 bg-indigo-500/40 border border-white/20 backdrop-blur-md text-white rounded-xl font-semibold text-sm hover:bg-indigo-500/60 transition flex items-center gap-2">
+                            <i class="fa-solid fa-plus"></i> Add New Skills
+                        </button>
+                    </div>
+                </div>
+                <!-- Background Graphic Decorative Elements -->
+                <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+                <div class="absolute right-20 -top-10 w-40 h-40 bg-violet-400/20 rounded-full blur-xl pointer-events-none"></div>
+            </div>
+
+            <!-- Stats Grid & Profile Completeness -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
+                <!-- Profile Completeness Card -->
+                <div class="md:col-span-1 bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="font-bold text-slate-800 text-sm">Profile Completeness</h3>
+                            <span id="dash-completeness-text" class="text-xs font-black text-indigo-600">85%</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-3 mb-3 overflow-hidden">
+                            <div id="dash-completeness-bar" class="bg-gradient-to-r from-indigo-500 to-violet-600 h-3 rounded-full transition-all duration-500" style="width: 85%;"></div>
+                        </div>
+                        <p id="dash-completeness-tip" class="text-xs text-slate-500 leading-relaxed">Add bio and availability to reach 100% and get 2x match priority!</p>
+                    </div>
+                    <button onclick="switchTab('profile')" class="mt-4 text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
+                        Complete Profile <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </button>
+                </div>
+
+                <!-- Stat 1: Hours Taught -->
+                <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl font-bold">
+                        <i class="fa-solid fa-chalkboard-user"></i>
+                    </div>
+                    <div>
+                        <div id="dash-hours-taught" class="text-2xl font-black text-slate-800">14.5 hrs</div>
+                        <div class="text-xs font-medium text-slate-500">Taught to Others</div>
+                    </div>
+                </div>
+
+                <!-- Stat 2: Hours Learned -->
+                <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center text-xl font-bold">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                    </div>
+                    <div>
+                        <div id="dash-hours-learned" class="text-2xl font-black text-slate-800">18.0 hrs</div>
+                        <div class="text-xs font-medium text-slate-500">Learned from Peers</div>
+                    </div>
+                </div>
+
+                <!-- Stat 3: Peer Rating -->
+                <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-500 flex items-center justify-center text-xl font-bold">
+                        <i class="fa-solid fa-star"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-1">
+                            <span id="dash-rating-avg" class="text-2xl font-black text-slate-800">4.9</span>
+                            <span class="text-xs text-slate-400">/5.0</span>
+                        </div>
+                        <div class="text-xs font-medium text-slate-500"><span id="dash-rating-count">12</span> Reviews Received</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Action Cards & Mutual Highlights -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Top Mutual Matches Quick View -->
+                <div class="lg:col-span-2 bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-800">Top Mutual Matches</h2>
+                            <p class="text-xs text-slate-500">Students who want what you teach, and teach what you want</p>
+                        </div>
+                        <button onclick="switchTab('matches')" class="text-xs font-bold text-indigo-600 hover:underline">View All</button>
+                    </div>
+
+                    <div id="dash-mutual-list" class="space-y-3">
+                        <!-- Dynamic Mutual Match Cards -->
+                    </div>
+                </div>
+
+                <!-- Recent Session & Activity -->
+                <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800 mb-1">Upcoming Sessions</h2>
+                        <p class="text-xs text-slate-500 mb-4">Your scheduled learning exchanges</p>
+                        
+                        <div id="dash-upcoming-sessions" class="space-y-3">
+                            <!-- Dynamic Upcoming Sessions -->
+                        </div>
+                    </div>
+
+                    <div class="mt-6 pt-4 border-t border-slate-100">
+                        <button onclick="switchTab('sessions')" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition flex items-center justify-center gap-2">
+                            Manage All Sessions <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= TAB 2: FIND MATCHES ================= -->
+        <section id="tab-matches" class="tab-content hidden space-y-6">
+            <!-- Header & Search Controls -->
+            <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h1 class="text-2xl font-bold text-slate-800">Discover Skill Partners</h1>
+                        <p class="text-slate-500 text-sm">Find students with complementary skills for direct or 3-way exchanges.</p>
+                    </div>
+
+                    <!-- Search Input -->
+                    <div class="relative min-w-[260px]">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
+                        <input type="text" id="match-search-input" onkeyup="filterMatches()" placeholder="Search skill e.g. React, Guitar..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                    </div>
+                </div>
+
+                <!-- Match Type Tabs / Filters -->
+                <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100">
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="setMatchTypeFilter('all')" id="filter-btn-all" class="match-filter-btn px-4 py-1.5 rounded-lg text-xs font-bold transition bg-indigo-600 text-white">
+                            All Swaps
+                        </button>
+                        <button onclick="setMatchTypeFilter('mutual')" id="filter-btn-mutual" class="match-filter-btn px-4 py-1.5 rounded-lg text-xs font-bold transition bg-slate-100 text-slate-600 hover:bg-slate-200">
+                            🔥 Mutual Matches (2-Way)
+                        </button>
+                        <button onclick="setMatchTypeFilter('threeway')" id="filter-btn-threeway" class="match-filter-btn px-4 py-1.5 rounded-lg text-xs font-bold transition bg-slate-100 text-slate-600 hover:bg-slate-200">
+                            🔄 Three-Way Swaps (3-Way)
+                        </button>
+                        <button onclick="setMatchTypeFilter('oneway')" id="filter-btn-oneway" class="match-filter-btn px-4 py-1.5 rounded-lg text-xs font-bold transition bg-slate-100 text-slate-600 hover:bg-slate-200">
+                            🎓 Mentors (One-Way)
+                        </button>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-slate-400 font-medium">Skill Level:</span>
+                        <select id="level-filter-select" onchange="filterMatches()" class="bg-slate-50 border border-slate-200 text-xs font-semibold rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="all">All Levels</option>
+                            <option value="Expert">Expert</option>
+                            <option value="Intermediate">Intermediate</option>
+                            <option value="Beginner">Beginner</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Match Results Container -->
+            <div id="matches-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Dynamically Populated Match Cards -->
+            </div>
+        </section>
+
+
+        <!-- ================= TAB 3: REQUESTS & SESSIONS ================= -->
+        <section id="tab-sessions" class="tab-content hidden space-y-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-800">Requests & Sessions</h1>
+                    <p class="text-slate-500 text-sm">Manage your pending invitations, upcoming exchanges, and past reviews.</p>
+                </div>
+                <div class="flex bg-slate-200/70 p-1 rounded-xl">
+                    <button onclick="switchSessionSubTab('pending')" id="subtab-pending" class="px-4 py-1.5 rounded-lg text-xs font-bold transition bg-white text-slate-800 shadow-sm">Pending Requests</button>
+                    <button onclick="switchSessionSubTab('upcoming')" id="subtab-upcoming" class="px-4 py-1.5 rounded-lg text-xs font-bold transition text-slate-600 hover:text-slate-900">Upcoming</button>
+                    <button onclick="switchSessionSubTab('completed')" id="subtab-completed" class="px-4 py-1.5 rounded-lg text-xs font-bold transition text-slate-600 hover:text-slate-900">History & Ratings</button>
+                </div>
+            </div>
+
+            <!-- Sub Tab 1: Pending Requests -->
+            <div id="session-container-pending" class="space-y-4">
+                <!-- Populated dynamically -->
+            </div>
+
+            <!-- Sub Tab 2: Upcoming Sessions -->
+            <div id="session-container-upcoming" class="hidden space-y-4">
+                <!-- Populated dynamically -->
+            </div>
+
+            <!-- Sub Tab 3: Completed Sessions & Rating -->
+            <div id="session-container-completed" class="hidden space-y-4">
+                <!-- Populated dynamically -->
+            </div>
+        </section>
+
+
+        <!-- ================= TAB 4: DEMAND INSIGHTS ================= -->
+        <section id="tab-insights" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
+                <h1 class="text-2xl font-bold text-slate-800">Skill Demand Insights</h1>
+                <p class="text-slate-500 text-sm">Community analytics: See which skills are most requested vs most offered in real-time.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Chart / Comparative Bars Container -->
+                <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-6">
+                    <div class="flex justify-between items-center">
+                        <h2 class="font-bold text-slate-800">Top Skills Comparison</h2>
+                        <div class="flex items-center gap-4 text-xs font-medium">
+                            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-indigo-600 inline-block"></span> Wanted (Learners)</span>
+                            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> Offered (Teachers)</span>
+                        </div>
+                    </div>
+
+                    <div id="demand-bars-container" class="space-y-5">
+                        <!-- Dynamic Bar Charts -->
+                    </div>
+                </div>
+
+                <!-- High Demand & Shortage Skills Summary Cards -->
+                <div class="space-y-6">
+                    <!-- High Opportunity Card -->
+                    <div class="bg-gradient-to-br from-indigo-50 to-violet-50 border border-indigo-100 p-6 rounded-2xl">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold">
+                                <i class="fa-solid fa-bolt"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-800 text-sm">Highest Skill Demand</h3>
+                                <p class="text-xs text-indigo-600 font-semibold">Great opportunity to teach!</p>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-600 leading-relaxed mb-4">
+                            Skills like <strong class="text-slate-800">UI Design</strong> and <strong class="text-slate-800">Python</strong> have 3x more students wanting to learn than available mentors.
+                        </p>
+                        <button onclick="switchTab('profile')" class="w-full py-2 bg-indigo-600 text-white font-bold rounded-xl text-xs hover:bg-indigo-700 transition">
+                            Add These Skills to Teach
+                        </button>
+                    </div>
+
+                    <!-- Market Balance Summary -->
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-3">
+                        <h3 class="font-bold text-slate-800 text-sm">Community Summary</h3>
+                        <div class="flex justify-between items-center text-xs py-2 border-b border-slate-100">
+                            <span class="text-slate-500">Total Registered Skills</span>
+                            <span id="stat-total-skills-count" class="font-bold text-slate-800">42</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs py-2 border-b border-slate-100">
+                            <span class="text-slate-500">Most Active Match Ratio</span>
+                            <span class="font-bold text-emerald-600">88% Match Rate</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs py-2">
+                            <span class="text-slate-500">Average Session Duration</span>
+                            <span class="font-bold text-slate-800">1.0 Hour</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= TAB 5: MY PROFILE ================= -->
+        <section id="tab-profile" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-800">Profile & Skill Management</h1>
+                    <p class="text-slate-500 text-sm">Keep your skills and availability updated to receive accurate match recommendations.</p>
+                </div>
+                <button onclick="saveUserProfile()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-xl transition shadow-md flex items-center gap-2">
+                    <i class="fa-solid fa-floppy-disk"></i> Save Profile Changes
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Personal Info & Availability -->
+                <div class="lg:col-span-1 space-y-6">
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+                        <h2 class="font-bold text-slate-800 border-b border-slate-100 pb-3">Basic Information</h2>
+                        
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Full Name</label>
+                            <input type="text" id="profile-name-input" class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Role / Bio</label>
+                            <textarea id="profile-bio-input" rows="3" class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-normal focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Brief intro about yourself..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Availability Selection -->
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+                        <h2 class="font-bold text-slate-800 border-b border-slate-100 pb-3">Meeting Availability</h2>
+                        <p class="text-xs text-slate-500">Select days you can schedule learning sessions:</p>
+
+                        <div id="availability-checkboxes" class="grid grid-cols-2 gap-2 text-xs font-semibold">
+                            <!-- Populated dynamically -->
+                        </div>
+
+                        <div class="pt-2">
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Preferred Time Window</label>
+                            <select id="profile-time-slot" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <option value="Evenings (5 PM - 9 PM)">Evenings (5 PM - 9 PM)</option>
+                                <option value="Mornings (8 AM - 12 PM)">Mornings (8 AM - 12 PM)</option>
+                                <option value="Afternoons (12 PM - 5 PM)">Afternoons (12 PM - 5 PM)</option>
+                                <option value="Flexible / Weekends">Flexible / Weekends</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Skills Management (Offer & Want) -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- Skills I Can Teach -->
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+                        <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                            <div>
+                                <h2 class="font-bold text-slate-800">Skills You Offer (To Teach)</h2>
+                                <p class="text-xs text-slate-500">What expertise can you share with others?</p>
+                            </div>
+                            <button onclick="openAddSkillModal('offer')" class="px-3 py-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 font-bold rounded-lg text-xs transition flex items-center gap-1">
+                                <i class="fa-solid fa-plus"></i> Add Skill
+                            </button>
+                        </div>
+
+                        <div id="profile-offered-skills-list" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Skills I Want to Learn -->
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+                        <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                            <div>
+                                <h2 class="font-bold text-slate-800">Skills You Want (To Learn)</h2>
+                                <p class="text-xs text-slate-500">What skills are you seeking mentors for?</p>
+                            </div>
+                            <button onclick="openAddSkillModal('want')" class="px-3 py-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 font-bold rounded-lg text-xs transition flex items-center gap-1">
+                                <i class="fa-solid fa-plus"></i> Add Skill
+                            </button>
+                        </div>
+
+                        <div id="profile-wanted-skills-list" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ================= MODALS ================= -->
+
+    <!-- Modal 1: Booking Request Modal -->
+    <div id="modal-booking" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-5 animate-in fade-in zoom-in duration-200">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="font-bold text-slate-800 text-lg">Request Skill Swap Session</h3>
+                <button onclick="closeModal('modal-booking')" class="text-slate-400 hover:text-slate-600 text-lg"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div id="booking-partner-summary" class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 flex items-center gap-3">
+                <!-- Dynamic Partner Details -->
+            </div>
+
+            <form id="booking-form" onsubmit="handleSendBookingRequest(event)" class="space-y-4">
+                <input type="hidden" id="booking-partner-id">
+                
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Select Day</label>
+                    <select id="booking-day" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <!-- Dynamic Available Days -->
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Select Time</label>
+                    <input type="time" id="booking-time" required value="17:00" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Topic / Notes for Session</label>
+                    <textarea id="booking-notes" rows="3" required placeholder="e.g. Let's practice JavaScript Async/Await and UI Color Theory!" class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-normal focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                </div>
+
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="closeModal('modal-booking')" class="w-1/2 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition">Cancel</button>
+                    <button type="submit" class="w-1/2 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl transition shadow-md shadow-indigo-200">Send Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- Modal 2: Add Skill Modal -->
+    <div id="modal-add-skill" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 id="add-skill-modal-title" class="font-bold text-slate-800 text-base">Add New Skill</h3>
+                <button onclick="closeModal('modal-add-skill')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <form id="add-skill-form" onsubmit="handleAddSkillSubmit(event)" class="space-y-4">
+                <input type="hidden" id="add-skill-type">
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Skill Name</label>
+                    <input type="text" id="add-skill-name" required placeholder="e.g. Python, Graphic Design, Spanish" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Skill Level</label>
+                    <select id="add-skill-level" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="Beginner">Beginner</option>
+                        <option value="Intermediate">Intermediate</option>
+                        <option value="Expert">Expert</option>
+                    </select>
+                </div>
+
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="closeModal('modal-add-skill')" class="w-1/2 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition">Cancel</button>
+                    <button type="submit" class="w-1/2 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl transition">Add Skill</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- Modal 3: Peer Rating & Review Modal -->
+    <div id="modal-rating" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="font-bold text-slate-800 text-base">Rate Session Partner</h3>
+                <button onclick="closeModal('modal-rating')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <form id="rating-form" onsubmit="handleRatingSubmit(event)" class="space-y-4">
+                <input type="hidden" id="rating-session-id">
+
+                <div class="text-center py-2">
+                    <p id="rating-partner-name" class="text-sm font-bold text-slate-800 mb-2">Alex Johnson</p>
+                    <div class="flex justify-center gap-2 text-2xl text-amber-400 cursor-pointer" id="star-rating-picker">
+                        <i class="fa-solid fa-star star-btn" onclick="setRatingStars(1)"></i>
+                        <i class="fa-solid fa-star star-btn" onclick="setRatingStars(2)"></i>
+                        <i class="fa-solid fa-star star-btn" onclick="setRatingStars(3)"></i>
+                        <i class="fa-solid fa-star star-btn" onclick="setRatingStars(4)"></i>
+                        <i class="fa-solid fa-star star-btn" onclick="setRatingStars(5)"></i>
+                    </div>
+                    <input type="hidden" id="selected-star-val" value="5">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Feedback / Review</label>
+                    <textarea id="rating-review-text" rows="3" required placeholder="Very patient and knowledgeable tutor!" class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                </div>
+
+                <div class="flex gap-3">
+                    <button type="button" onclick="closeModal('modal-rating')" class="w-1/2 py-2.5 bg-slate-100 text-slate-700 font-bold text-xs rounded-xl">Cancel</button>
+                    <button type="submit" class="w-1/2 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl shadow-md shadow-amber-200">Submit Review</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- ================= JAVASCRIPT LOGIC ================= -->
+    <script>
+        // Default Mock Data for Community Users & Current Logged-in User
+        const defaultCurrentUser = {
+            id: 'user_current',
+            name: "Alex Johnson",
+            avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150",
+            bio: "Full Stack Development student passionate about UI design and learning conversational Spanish.",
+            availability: ["Monday", "Wednesday", "Friday", "Saturday"],
+            timeSlot: "Evenings (5 PM - 9 PM)",
+            offeredSkills: [
+                { name: "JavaScript", level: "Expert" },
+                { name: "React JS", level: "Intermediate" },
+                { name: "HTML & CSS", level: "Expert" }
+            ],
+            wantedSkills: [
+                { name: "UI Design", level: "Beginner" },
+                { name: "Spanish", level: "Beginner" },
+                { name: "Python", level: "Intermediate" }
+            ],
+            hoursTaught: 14.5,
+            hoursLearned: 18.0,
+            rating: 4.9,
+            reviewsCount: 12
+        };
+
+        const defaultPeerUsers = [
+            {
+                id: 'user_1',
+                name: "Sophia Chen",
+                avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150",
+                bio: "UX Designer with 3 years experience. Looking to improve coding and web script logic.",
+                availability: ["Monday", "Wednesday", "Saturday"],
+                timeSlot: "Evenings (5 PM - 9 PM)",
+                offeredSkills: [
+                    { name: "UI Design", level: "Expert" },
+                    { name: "Figma", level: "Expert" }
+                ],
+                wantedSkills: [
+                    { name: "JavaScript", level: "Beginner" },
+                    { name: "React JS", level: "Beginner" }
+                ],
+                rating: 5.0,
+                reviewsCount: 18
+            },
+            {
+                id: 'user_2',
+                name: "Marcus Vance",
+                avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150",
+                bio: "Native Spanish speaker & Data Scientist. Want to learn frontend frameworks.",
+                availability: ["Tuesday", "Thursday", "Sunday"],
+                timeSlot: "Mornings (8 AM - 12 PM)",
+                offeredSkills: [
+                    { name: "Spanish", level: "Expert" },
+                    { name: "Python", level: "Expert" }
+                ],
+                wantedSkills: [
+                    { name: "React JS", level: "Beginner" },
+                    { name: "HTML & CSS", level: "Intermediate" }
+                ],
+                rating: 4.8,
+                reviewsCount: 9
+            },
+            {
+                id: 'user_3',
+                name: "David Kim",
+                avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=150",
+                bio: "Music producer & Video Editor. Eager to pick up Python automation skills.",
+                availability: ["Wednesday", "Friday", "Sunday"],
+                timeSlot: "Afternoons (12 PM - 5 PM)",
+                offeredSkills: [
+                    { name: "Video Editing", level: "Expert" },
+                    { name: "Guitar", level: "Intermediate" }
+                ],
+                wantedSkills: [
+                    { name: "Python", level: "Beginner" }
+                ],
+                rating: 4.7,
+                reviewsCount: 15
+            },
+            {
+                id: 'user_4',
+                name: "Elena Rostova",
+                avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=150",
+                bio: "Python developer who wants to learn Video Editing for YouTube tutorials.",
+                availability: ["Friday", "Saturday", "Sunday"],
+                timeSlot: "Flexible / Weekends",
+                offeredSkills: [
+                    { name: "Python", level: "Expert" }
+                ],
+                wantedSkills: [
+                    { name: "Video Editing", level: "Beginner" }
+                ],
+                rating: 4.9,
+                reviewsCount: 22
+            }
+        ];
+
+        const defaultSessions = [
+            {
+                id: 'sess_1',
+                partnerId: 'user_1',
+                partnerName: "Sophia Chen",
+                partnerAvatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150",
+                youTeach: "JavaScript",
+                youLearn: "UI Design",
+                day: "Wednesday",
+                time: "18:00",
+                status: "upcoming", // pending, upcoming, completed
+                notes: "Introductory session covering JS Functions and Figma Auto Layout."
+            },
+            {
+                id: 'sess_2',
+                partnerId: 'user_2',
+                partnerName: "Marcus Vance",
+                partnerAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150",
+                youTeach: "React JS",
+                youLearn: "Spanish",
+                day: "Thursday",
+                time: "10:00",
+                status: "pending",
+                notes: "Practicing Spanish conversation and React State hook."
+            },
+            {
+                id: 'sess_3',
+                partnerId: 'user_3',
+                partnerName: "David Kim",
+                partnerAvatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=150",
+                youTeach: "HTML & CSS",
+                youLearn: "Guitar",
+                day: "Last Week",
+                time: "14:00",
+                status: "completed",
+                notes: "Completed basic chords and CSS Flexbox grid layout.",
+                rated: true,
+                stars: 5,
+                review: "Awesome teacher, explained flexbox so clearly!"
+            }
+        ];
+
+        // Global State initialization with localStorage fallback
+        let currentUser = JSON.parse(localStorage.getItem('ss_currentUser')) || defaultCurrentUser;
+        let peerUsers = JSON.parse(localStorage.getItem('ss_peerUsers')) || defaultPeerUsers;
+        let sessions = JSON.parse(localStorage.getItem('ss_sessions')) || defaultSessions;
+
+        let activeTab = 'dashboard';
+        let matchFilter = 'all';
+
+        // Initialize App on DOM Loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            renderHeaderAndProfileInfo();
+            renderDashboard();
+            renderMatches();
+            renderSessions();
+            renderDemandInsights();
+            renderProfileTab();
+            updatePendingBadge();
+        });
+
+        // Save State helper
+        function saveState() {
+            localStorage.setItem('ss_currentUser', JSON.stringify(currentUser));
+            localStorage.setItem('ss_peerUsers', JSON.stringify(peerUsers));
+            localStorage.setItem('ss_sessions', JSON.stringify(sessions));
+            
+            // Re-render components
+            renderHeaderAndProfileInfo();
+            renderDashboard();
+            renderMatches();
+            renderSessions();
+            renderDemandInsights();
+            renderProfileTab();
+            updatePendingBadge();
+        }
+
+        // Navigation Tab Switching
+        function switchTab(tabId) {
+            activeTab = tabId;
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            // Desktop tab styling
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-indigo-50', 'text-indigo-600');
+                btn.classList.add('text-slate-600', 'hover:bg-slate-100');
+            });
+            const activeNavBtn = document.getElementById(`nav-${tabId}`);
+            if (activeNavBtn) {
+                activeNavBtn.classList.add('bg-indigo-50', 'text-indigo-600');
+                activeNavBtn.classList.remove('text-slate-600', 'hover:bg-slate-100');
+            }
+
+            // Mobile tab styling
+            document.querySelectorAll('.mobile-nav-btn').forEach(btn => btn.classList.replace('text-indigo-600', 'text-slate-500'));
+            const activeMobBtn = document.getElementById(`mob-${tabId}`);
+            if (activeMobBtn) activeMobBtn.classList.replace('text-slate-500', 'text-indigo-600');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Render Header User Info
+        function renderHeaderAndProfileInfo() {
+            document.getElementById('header-user-name').innerText = currentUser.name;
+            document.getElementById('header-user-avatar').src = currentUser.avatar;
+            document.getElementById('dash-greeting-name').innerText = currentUser.name.split(' ')[0];
+        }
+
+        // Calculate Profile Completeness Percentage
+        function calculateCompleteness() {
+            let score = 0;
+            if (currentUser.name) score += 20;
+            if (currentUser.bio) score += 20;
+            if (currentUser.offeredSkills.length > 0) score += 25;
+            if (currentUser.wantedSkills.length > 0) score += 25;
+            if (currentUser.availability.length > 0) score += 10;
+            return Math.min(100, score);
+        }
+
+        // RENDER TAB 1: DASHBOARD
+        function renderDashboard() {
+            const completeness = calculateCompleteness();
+            document.getElementById('dash-completeness-text').innerText = `${completeness}%`;
+            document.getElementById('dash-completeness-bar').style.width = `${completeness}%`;
+            document.getElementById('dash-hours-taught').innerText = `${currentUser.hoursTaught.toFixed(1)} hrs`;
+            document.getElementById('dash-hours-learned').innerText = `${currentUser.hoursLearned.toFixed(1)} hrs`;
+            document.getElementById('dash-rating-avg').innerText = currentUser.rating.toFixed(1);
+            document.getElementById('dash-rating-count').innerText = currentUser.reviewsCount;
+
+            // Render Mutual Highlights
+            const mutualContainer = document.getElementById('dash-mutual-list');
+            const matches = getCalculatedMatches().filter(m => m.type === 'mutual');
+
+            if (matches.length === 0) {
+                mutualContainer.innerHTML = `<p class="text-xs text-slate-400 py-4 text-center">No exact mutual matches found right now. Try adding more skills to your profile!</p>`;
+            } else {
+                mutualContainer.innerHTML = matches.slice(0, 3).map(m => `
+                    <div class="p-4 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                        <div class="flex items-center gap-3">
+                            <img src="${m.user.avatar}" class="w-12 h-12 rounded-full object-cover border border-slate-200">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h4 class="font-bold text-slate-800 text-sm">${m.user.name}</h4>
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-700">${m.score}% Match</span>
+                                </div>
+                                <p class="text-xs text-slate-500 mt-0.5">${m.explanation}</p>
+                            </div>
+                        </div>
+                        <button onclick="openBookingModal('${m.user.id}')" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs transition shadow-sm w-full sm:w-auto text-center">
+                            Request Swap
+                        </button>
+                    </div>
+                `).join('');
+            }
+
+            // Render Upcoming Sessions Card
+            const upcomingContainer = document.getElementById('dash-upcoming-sessions');
+            const upcomingList = sessions.filter(s => s.status === 'upcoming');
+
+            if (upcomingList.length === 0) {
+                upcomingContainer.innerHTML = `<p class="text-xs text-slate-400 py-4 text-center">No upcoming sessions scheduled.</p>`;
+            } else {
+                upcomingContainer.innerHTML = upcomingList.slice(0, 2).map(s => `
+                    <div class="p-3 bg-indigo-50/60 rounded-xl border border-indigo-100 flex items-center gap-3">
+                        <img src="${s.partnerAvatar}" class="w-10 h-10 rounded-full object-cover">
+                        <div class="flex-grow min-w-0">
+                            <h5 class="text-xs font-bold text-slate-800 truncate">${s.partnerName}</h5>
+                            <p class="text-[11px] text-indigo-700 font-semibold truncate"><i class="fa-solid fa-clock text-[10px]"></i> ${s.day} @ ${s.time}</p>
+                            <span class="text-[10px] text-slate-500 block truncate">Teach ${s.youTeach} / Learn ${s.youLearn}</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+
+        // MATCHING ENGINE ALGORITHM
+        function getCalculatedMatches() {
+            let matches = [];
+
+            // 1. Direct Mutual Matches & One-Way Matches
+            peerUsers.forEach(peer => {
+                // Skills peer can teach you (Matches what you want)
+                const canTeachYou = peer.offeredSkills.filter(offered => 
+                    currentUser.wantedSkills.some(w => w.name.toLowerCase() === offered.name.toLowerCase())
+                );
+
+                // Skills you can teach peer (Matches what peer wants)
+                const youCanTeachPeer = currentUser.offeredSkills.filter(offered =>
+                    peer.wantedSkills.some(w => w.name.toLowerCase() === offered.name.toLowerCase())
+                );
+
+                // Check Mutual
+                if (canTeachYou.length > 0 && youCanTeachPeer.length > 0) {
+                    const teachSkill = youCanTeachPeer[0].name;
+                    const learnSkill = canTeachYou[0].name;
+                    matches.push({
+                        type: 'mutual',
+                        score: 95,
+                        user: peer,
+                        teachSkill,
+                        learnSkill,
+                        explanation: `Direct Match: You teach ${teachSkill} to ${peer.name.split(' ')[0]} and learn ${learnSkill}!`
+                    });
+                } 
+                // Check One-Way (Peer has what you want, but peer doesn't need your current skills)
+                else if (canTeachYou.length > 0) {
+                    const learnSkill = canTeachYou[0].name;
+                    matches.push({
+                        type: 'oneway',
+                        score: 70,
+                        user: peer,
+                        learnSkill,
+                        explanation: `Mentor Match: ${peer.name.split(' ')[0]} can teach you ${learnSkill} (One-Way Mentor).`
+                    });
+                }
+            });
+
+            // 2. Three-Way Swaps Detection (A teaches B, B teaches C, C teaches A)
+            // Current User (A) -> wants X, teaches Y
+            // Peer 1 (B) -> wants Y, teaches Z
+            // Peer 2 (C) -> wants Z, teaches X
+            for (let b of peerUsers) {
+                // Find if Current User can teach B
+                const aTeachesB = currentUser.offeredSkills.filter(s => b.wantedSkills.some(w => w.name.toLowerCase() === s.name.toLowerCase()));
+                if (aTeachesB.length === 0) continue;
+
+                for (let c of peerUsers) {
+                    if (c.id === b.id) continue;
+
+                    // Find if B can teach C
+                    const bTeachesC = b.offeredSkills.filter(s => c.wantedSkills.some(w => w.name.toLowerCase() === s.name.toLowerCase()));
+                    // Find if C can teach Current User
+                    const cTeachesA = c.offeredSkills.filter(s => currentUser.wantedSkills.some(w => w.name.toLowerCase() === s.name.toLowerCase()));
+
+                    if (bTeachesC.length > 0 && cTeachesA.length > 0) {
+                        const alreadyInMatches = matches.some(m => m.type === 'threeway' && m.user.id === b.id);
+                        if (!alreadyInMatches) {
+                            matches.push({
+                                type: 'threeway',
+                                score: 88,
+                                user: b,
+                                chainPartner: c,
+                                teachSkill: aTeachesB[0].name,
+                                bTeachesC: bTeachesC[0].name,
+                                learnSkill: cTeachesA[0].name,
+                                explanation: `3-Way Swap Chain: You teach ${aTeachesB[0].name} to ${b.name.split(' ')[0]} ➔ ${b.name.split(' ')[0]} teaches ${bTeachesC[0].name} to ${c.name.split(' ')[0]} ➔ ${c.name.split(' ')[0]} teaches ${cTeachesA[0].name} to You!`
+                            });
+                        }
+                    }
+                }
+            }
+
+            return matches;
+        }
+
+        // RENDER TAB 2: MATCHES
+        function renderMatches() {
+            const container = document.getElementById('matches-grid');
+            let allMatches = getCalculatedMatches();
+
+            const query = document.getElementById('match-search-input')?.value.toLowerCase() || '';
+            const levelFilter = document.getElementById('level-filter-select')?.value || 'all';
+
+            // Filter logic
+            let filtered = allMatches.filter(m => {
+                // Type Filter
+                if (matchFilter !== 'all' && m.type !== matchFilter) return false;
+
+                // Search query
+                const searchTxt = `${m.user.name} ${m.user.offeredSkills.map(s=>s.name).join(' ')} ${m.user.wantedSkills.map(s=>s.name).join(' ')}`.toLowerCase();
+                if (query && !searchTxt.includes(query)) return false;
+
+                // Skill level filter
+                if (levelFilter !== 'all') {
+                    const hasLevel = m.user.offeredSkills.some(s => s.level === levelFilter);
+                    if (!hasLevel) return false;
+                }
+
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full py-12 text-center bg-white rounded-2xl border border-slate-200/80">
+                        <i class="fa-solid fa-user-slash text-4xl text-slate-300 mb-3"></i>
+                        <h3 class="font-bold text-slate-700 text-base">No matches found</h3>
+                        <p class="text-xs text-slate-400 mt-1">Try adjusting your search keywords or adding more skills to your profile.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filtered.map(m => `
+                <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+                    <div>
+                        <!-- Header & Score -->
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="flex items-center gap-3">
+                                <img src="${m.user.avatar}" class="w-12 h-12 rounded-full object-cover border border-slate-200">
+                                <div>
+                                    <h3 class="font-bold text-slate-800 text-sm">${m.user.name}</h3>
+                                    <div class="flex items-center gap-1 text-xs text-amber-500 font-semibold">
+                                        <i class="fa-solid fa-star"></i> ${m.user.rating.toFixed(1)} <span class="text-slate-400">(${m.user.reviewsCount})</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <span class="px-2.5 py-1 rounded-xl text-xs font-black ${
+                                m.type === 'mutual' ? 'bg-emerald-100 text-emerald-700' :
+                                m.type === 'threeway' ? 'bg-purple-100 text-purple-700' : 'bg-sky-100 text-sky-700'
+                            }">
+                                ${m.score}% Match
+                            </span>
+                        </div>
+
+                        <!-- Bio -->
+                        <p class="text-xs text-slate-600 line-clamp-2 mb-4 leading-relaxed">${m.user.bio}</p>
+
+                        <!-- Explanation Pill -->
+                        <div class="p-3 rounded-xl ${
+                            m.type === 'mutual' ? 'bg-emerald-50/70 border border-emerald-100' :
+                            m.type === 'threeway' ? 'bg-purple-50/70 border border-purple-100' : 'bg-sky-50/70 border border-sky-100'
+                        } mb-4">
+                            <span class="text-[10px] font-bold uppercase tracking-wider block mb-1 ${
+                                m.type === 'mutual' ? 'text-emerald-700' : m.type === 'threeway' ? 'text-purple-700' : 'text-sky-700'
+                            }">${m.type === 'mutual' ? '🔥 Mutual 2-Way Match' : m.type === 'threeway' ? '🔄 3-Way Chain Match' : '🎓 One-Way Mentor'}</span>
+                            <p class="text-xs font-medium text-slate-700 leading-snug">${m.explanation}</p>
+                        </div>
+
+                        <!-- Skills List -->
+                        <div class="space-y-2 mb-4">
+                            <div>
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Teaches:</span>
+                                <div class="flex flex-wrap gap-1 mt-1">
+                                    ${m.user.offeredSkills.map(s => `<span class="px-2 py-0.5 bg-slate-100 text-slate-700 rounded-md text-[11px] font-semibold">${s.name} <span class="text-[9px] text-slate-400">(${s.level})</span></span>`).join('')}
+                                </div>
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Wants to learn:</span>
+                                <div class="flex flex-wrap gap-1 mt-1">
+                                    ${m.user.wantedSkills.map(s => `<span class="px-2 py-0.5 bg-slate-100 text-slate-700 rounded-md text-[11px] font-semibold">${s.name}</span>`).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Availability & Action Button -->
+                    <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+                        <div class="text-[11px] text-slate-500">
+                            <i class="fa-solid fa-calendar-days text-slate-400"></i> ${m.user.availability.slice(0, 2).join(', ')}
+                        </div>
+                        <button onclick="openBookingModal('${m.user.id}')" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs transition shadow-md shadow-indigo-100">
+                            Connect & Swap
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function setMatchTypeFilter(type) {
+            matchFilter = type;
+            document.querySelectorAll('.match-filter-btn').forEach(btn => {
+                btn.classList.remove('bg-indigo-600', 'text-white');
+                btn.classList.add('bg-slate-100', 'text-slate-600', 'hover:bg-slate-200');
+            });
+            const btn = document.getElementById(`filter-btn-${type}`);
+            if (btn) {
+                btn.classList.add('bg-indigo-600', 'text-white');
+                btn.classList.remove('bg-slate-100', 'text-slate-600');
+            }
+            renderMatches();
+        }
+
+        function filterMatches() {
+            renderMatches();
+        }
+
+
+        // RENDER TAB 3: REQUESTS & SESSIONS
+        function renderSessions() {
+            const pendingContainer = document.getElementById('session-container-pending');
+            const upcomingContainer = document.getElementById('session-container-upcoming');
+            const completedContainer = document.getElementById('session-container-completed');
+
+            const pendingList = sessions.filter(s => s.status === 'pending');
+            const upcomingList = sessions.filter(s => s.status === 'upcoming');
+            const completedList = sessions.filter(s => s.status === 'completed');
+
+            // 1. Pending Cards
+            if (pendingList.length === 0) {
+                pendingContainer.innerHTML = `<div class="bg-white p-8 text-center rounded-2xl border border-slate-200/80 text-xs text-slate-400">No pending session requests.</div>`;
+            } else {
+                pendingContainer.innerHTML = pendingList.map(s => `
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <img src="${s.partnerAvatar}" class="w-12 h-12 rounded-full object-cover">
+                            <div>
+                                <h4 class="font-bold text-slate-800 text-sm">${s.partnerName}</h4>
+                                <p class="text-xs text-slate-500 font-medium">Topic: ${s.notes}</p>
+                                <span class="text-[11px] text-indigo-600 font-bold mt-1 block"><i class="fa-solid fa-clock"></i> Proposed: ${s.day} @ ${s.time}</span>
+                            </div>
+                        </div>
+                        <div class="flex gap-2 w-full sm:w-auto">
+                            <button onclick="handleSessionAction('${s.id}', 'decline')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs transition flex-1 sm:flex-none">Decline</button>
+                            <button onclick="handleSessionAction('${s.id}', 'accept')" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs transition flex-1 sm:flex-none shadow-md shadow-indigo-100">Accept Request</button>
